@@ -1,0 +1,26 @@
+{
+  "date": "2026-07-17",
+  "url": "http://localhost:3001/",
+  "designScore": "A-",
+  "aiSlopScore": "A-",
+  "categoryGrades": {
+    "hierarchy": "A-",
+    "typography": "A-",
+    "spacing": "A",
+    "color": "A",
+    "interactions": "A-",
+    "responsive": "A-",
+    "content": "A",
+    "aiSlop": "A-",
+    "motion": "A",
+    "performanceFeel": "A"
+  },
+  "findings": [
+    { "id": "FINDING-001", "title": "안내 활동 건너뛰기", "impact": "high", "status": "verified" },
+    { "id": "FINDING-002", "title": "실제 정비 기록 누락", "impact": "high", "status": "verified" },
+    { "id": "FINDING-003", "title": "선택지 단위 표기 오류", "impact": "medium", "status": "verified" },
+    { "id": "FINDING-004", "title": "대화상자 초점 복귀", "impact": "medium", "status": "verified" },
+    { "id": "FINDING-005", "title": "제목 위계 약함", "impact": "polish", "status": "verified" },
+    { "id": "FINDING-006", "title": "320px 반응형 위험", "impact": "polish", "status": "verified" }
+  ]
+}
