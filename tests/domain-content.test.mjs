@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   buildRepairRecord,
+  faultHints,
   getReadingAfterRepair,
   getRemainingFaults,
   missionContent,
@@ -43,6 +44,7 @@ test("허용한 수리만 오류를 없애며, 마지막 미션은 두 번 수�
     getRemainingFaults(finalMission, ["remove-overlap", "restore-labels"]),
     [],
   );
+  assert.equal(faultHints[getRemainingFaults(finalMission, ["remove-overlap"])[0]], "눈금 숫자가 0, 1, 2처럼 차례인지 봐요.");
 });
 
 test("콘텐츠 검사는 설명과 수리 정보를 빠뜨린 미션을 거절한다", () => {
@@ -63,9 +65,9 @@ test("정비 기록은 학생의 어림과 수리, 전후 측정값, 이유를 �
     buildRepairRecord(mission, { estimate: 6, repairs: ["align-origin"] }),
     {
       missionId: "misaligned-zero-start",
-      title: "출발점을 맞춰요",
+      title: "시작을 0에 맞춰요",
       estimate: 6,
-      faults: ["물체 한 끝과 0이 맞지 않아요"],
+      faults: ["시작이 0과 맞지 않아요"],
       repairs: ["0에 맞추기"],
       brokenReading: 6,
       correctReading: 5,

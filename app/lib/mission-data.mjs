@@ -9,8 +9,9 @@ export const missionContent = [
   {
     id: "misaligned-zero-start",
     order: 1,
-    title: "출발점을 맞춰요",
-    shortFault: "0이 어긋남",
+    title: "시작을 0에 맞춰요",
+    shortFault: "시작이 0과 달라요",
+    hint: "물체 왼쪽 끝과 자의 0이 만났는지 봐요.",
     length: 5,
     brokenReading: 6,
     faults: ["origin-misaligned"],
@@ -28,6 +29,7 @@ export const missionContent = [
     order: 2,
     title: "틈을 닫아요",
     shortFault: "칸 사이의 틈",
+    hint: "칸 사이에 빈 곳이 있는지 봐요.",
     length: 5,
     brokenReading: 4,
     faults: ["gap"],
@@ -45,6 +47,7 @@ export const missionContent = [
     order: 3,
     title: "겹침을 풀어요",
     shortFault: "칸이 겹침",
+    hint: "두 칸이 같은 곳을 덮는지 봐요.",
     length: 5,
     brokenReading: 6,
     faults: ["overlap"],
@@ -60,8 +63,9 @@ export const missionContent = [
   {
     id: "unequal-unit-widths",
     order: 4,
-    title: "같은 크기로 맞춰요",
+    title: "칸을 같은 크기로 맞춰요",
     shortFault: "칸 크기가 다름",
+    hint: "칸들이 모두 같은 너비인지 봐요.",
     length: 6,
     brokenReading: null,
     faults: ["unequal-unit"],
@@ -77,8 +81,9 @@ export const missionContent = [
   {
     id: "boundary-and-combined-repair",
     order: 5,
-    title: "마지막 종합 점검",
+    title: "두 고장 함께 찾기",
     shortFault: "겹침과 숫자",
+    hint: "겹친 칸과 같은 숫자 두 개를 봐요.",
     length: 7,
     brokenReading: 8,
     faults: ["overlap", "label-sequence"],
@@ -94,12 +99,21 @@ export const missionContent = [
 ];
 
 export const faultLabels = {
-  "origin-misaligned": "물체 한 끝과 0이 맞지 않아요",
-  gap: "단위칸 사이에 틈이 있어요",
-  overlap: "단위칸이 겹쳐 있어요",
-  "unequal-unit": "단위칸 크기가 달라요",
-  "label-sequence": "눈금 숫자 차례가 바르지 않아요",
-  "boundary-count": "눈금선 수와 칸 수를 헷갈렸어요",
+  "origin-misaligned": "시작이 0과 맞지 않아요",
+  gap: "칸 사이에 틈이 있어요",
+  overlap: "칸이 겹쳐 있어요",
+  "unequal-unit": "칸 크기가 달라요",
+  "label-sequence": "눈금 숫자 차례가 달라요",
+  "boundary-count": "선과 칸을 헷갈렸어요",
+};
+
+export const faultHints = {
+  "origin-misaligned": "물체 왼쪽 끝과 자의 0이 만났는지 봐요.",
+  gap: "칸 사이에 빈 곳이 있는지 봐요.",
+  overlap: "두 칸이 같은 곳을 덮는지 봐요.",
+  "unequal-unit": "칸들이 모두 같은 너비인지 봐요.",
+  "label-sequence": "눈금 숫자가 0, 1, 2처럼 차례인지 봐요.",
+  "boundary-count": "선이 아니라 선 사이 칸을 하나씩 세어 봐요.",
 };
 
 export const repairLabels = {
