@@ -96,3 +96,13 @@ actions tied to the current ChatGPT user. Leave public content anonymous.
 
 - [vinext Documentation](https://github.com/cloudflare/vinext)
 - [Drizzle D1 Guide](https://orm.drizzle.team/docs/get-started/d1-new)
+
+## GitHub Pages 배포
+
+서버·로그인·외부 API 없이 실행되는 학습 화면은 GitHub Pages에서 제공합니다.
+
+배포 주소: https://wbmaker2.github.io/measurement-standard-rod-repair-shop/
+
+```bash
+npm run build:pages
+```
