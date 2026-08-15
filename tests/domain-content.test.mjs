@@ -5,6 +5,7 @@ import {
   buildRepairRecord,
   faultHints,
   getReadingAfterRepair,
+  getReadingForRepairs,
   getRemainingFaults,
   missionContent,
   validateMissionContent,
@@ -34,6 +35,19 @@ test("수리 뒤 값은 물체 길이와 같고, 고장 값은 각 고정 사례
   assert.equal(overlap.brokenReading, 6);
   assert.equal(getReadingAfterRepair(overlap), 5);
   assert.ok(missionContent.every((mission) => getReadingAfterRepair(mission) === mission.length));
+});
+
+test("수리 단계에 따라 현재 읽는 숫자가 바뀐다", () => {
+  const origin = missionContent.find((mission) => mission.id === "misaligned-zero-start");
+  const unknown = missionContent.find((mission) => mission.id === "unequal-unit-widths");
+  const finalMission = missionContent.at(-1);
+
+  assert.equal(getReadingForRepairs(origin, []), 6);
+  assert.equal(getReadingForRepairs(origin, ["align-origin"]), 5);
+  assert.equal(getReadingForRepairs(unknown, []), null);
+  assert.equal(getReadingForRepairs(unknown, ["normalize-units"]), 6);
+  assert.equal(getReadingForRepairs(finalMission, ["remove-overlap"]), 7);
+  assert.equal(getReadingForRepairs(finalMission, ["remove-overlap", "restore-labels"]), 7);
 });
 
 test("허용한 수리만 오류를 없애며, 마지막 미션은 두 번 수리해야 한다", () => {
@@ -70,6 +84,7 @@ test("정비 기록은 학생의 어림과 수리, 전후 측정값, 이유를 �
       faults: ["시작이 0과 맞지 않아요"],
       repairs: ["0에 맞추기"],
       brokenReading: 6,
+      currentReading: 5,
       correctReading: 5,
       explanation: "시작을 0에 맞추지 않고 끝 숫자만 읽었어요.",
     },

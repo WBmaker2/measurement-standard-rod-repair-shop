@@ -17,6 +17,7 @@ export const missionContent = [
     faults: ["origin-misaligned"],
     repairs: ["align-origin"],
     estimateOptions: [4, 5, 6],
+    readingByRepairs: { "": 6, "align-origin": 5 },
     object: "연필 띠",
     faultOptions: ["origin-misaligned", "gap", "overlap"],
     beforeText: "물체 시작이 눈금 1에 있어요. 끝 숫자 6만 읽으면 안 돼요.",
@@ -35,6 +36,7 @@ export const missionContent = [
     faults: ["gap"],
     repairs: ["close-gap"],
     estimateOptions: [4, 5, 6],
+    readingByRepairs: { "": 4, "close-gap": 5 },
     object: "종이 띠",
     faultOptions: ["gap", "overlap", "unequal-unit"],
     beforeText: "빈 공간 때문에 4칸처럼 보였어요.",
@@ -53,6 +55,7 @@ export const missionContent = [
     faults: ["overlap"],
     repairs: ["remove-overlap"],
     estimateOptions: [4, 5, 6],
+    readingByRepairs: { "": 6, "remove-overlap": 5 },
     object: "나무 막대",
     faultOptions: ["overlap", "gap", "origin-misaligned"],
     beforeText: "한 곳을 두 칸이 함께 덮어 6칸처럼 보였어요.",
@@ -71,6 +74,7 @@ export const missionContent = [
     faults: ["unequal-unit"],
     repairs: ["normalize-units"],
     estimateOptions: [5, 6, 7],
+    readingByRepairs: { "": null, "normalize-units": 6 },
     object: "책갈피 띠",
     faultOptions: ["unequal-unit", "gap", "overlap"],
     beforeText: "작은 칸과 큰 칸이 섞여 있어 숫자를 믿기 어려워요.",
@@ -89,6 +93,13 @@ export const missionContent = [
     faults: ["overlap", "label-sequence"],
     repairs: ["remove-overlap", "restore-labels"],
     estimateOptions: [5, 7, 9],
+    readingByRepairs: {
+      "": 8,
+      "remove-overlap": 7,
+      "restore-labels": 8,
+      "remove-overlap+restore-labels": 7,
+      "restore-labels+remove-overlap": 7,
+    },
     object: "색 테이프",
     faultOptions: ["overlap", "label-sequence", "boundary-count"],
     beforeText: "칸 하나가 겹치고 눈금 숫자도 한 번 겹쳐 있어요.",
@@ -136,6 +147,15 @@ export function getReadingAfterRepair(mission) {
   return mission.length;
 }
 
+export function getReadingForRepairs(mission, repairs = []) {
+  const repairOrder = Array.isArray(mission.repairs) ? mission.repairs : [];
+  const key = repairOrder.filter((repair) => repairs.includes(repair)).join("+");
+  if (Object.prototype.hasOwnProperty.call(mission.readingByRepairs ?? {}, key)) {
+    return mission.readingByRepairs[key];
+  }
+  return repairs.length === repairOrder.length ? mission.length : mission.brokenReading;
+}
+
 export function buildRepairRecord(mission, session) {
   return {
     missionId: mission.id,
@@ -144,6 +164,7 @@ export function buildRepairRecord(mission, session) {
     faults: mission.faults.map((fault) => faultLabels[fault]),
     repairs: session.repairs.map((repair) => repairLabels[repair]),
     brokenReading: mission.brokenReading,
+    currentReading: getReadingForRepairs(mission, session.repairs),
     correctReading: mission.length,
     explanation: mission.explanation,
   };
@@ -164,6 +185,7 @@ export function validateMissionContent(missions) {
     if (mission.faults.some((fault) => !Object.values(repairToFault).includes(fault))) errors.push(`${mission.id}: 오류에 맞는 수리 동작이 필요해요.`);
     if (mission.repairs.some((repair) => !repairToFault[repair] || !mission.faults.includes(repairToFault[repair]))) errors.push(`${mission.id}: 허용되지 않은 수리 동작이 있어요.`);
     if (getReadingAfterRepair(mission) !== mission.length) errors.push(`${mission.id}: 바른 측정값이 맞지 않아요.`);
+    if (!mission.readingByRepairs || getReadingForRepairs(mission, mission.repairs) !== mission.length) errors.push(`${mission.id}: 수리 단계별 측정값이 맞지 않아요.`);
   });
   return errors;
 }

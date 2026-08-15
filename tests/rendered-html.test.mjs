@@ -38,12 +38,13 @@ test("공유 메타데이터는 요청 호스트의 절대 og 이미지 주소�
 });
 
 test("제품 소스는 저학년용 다섯 단계와 접근성 안내를 유지한다", async () => {
-  const [page, layout, css, packageJson, data] = await Promise.all([
+  const [page, layout, css, packageJson, data, celebration] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
     readFile(new URL("../package.json", import.meta.url), "utf8"),
     readFile(new URL("../app/lib/mission-data.mjs", import.meta.url), "utf8"),
+    readFile(new URL("../app/components/CelebrationOverlay.tsx", import.meta.url), "utf8"),
   ]);
   assert.match(data, /boundary-and-combined-repair/);
   assert.match(data, /misaligned-zero-start/);
@@ -65,6 +66,12 @@ test("제품 소스는 저학년용 다섯 단계와 접근성 안내를 유지�
   assert.match(page, /첫 화면 속 자예요\. 먼저 길이를 어림해요/);
   assert.doesNotMatch(page, /\$\{value\} 화면 속 cm|\$\{mission\.length\} 화면 속 cm/);
   assert.match(page, /2026-07-18 · v1\.1\.0/);
+  assert.match(page, /2026-08-15 · v1\.2\.0/);
+  assert.match(page, /CelebrationOverlay/);
+  assert.match(page, /getReadingForRepairs/);
+  assert.match(page, /gi-pulse/);
+  assert.match(celebration, /정비 끝!/);
+  assert.match(celebration, /처음 화면으로/);
   assert.match(page, /내 어림|찾은 고장|고친 방법|고친 뒤 길이|알게 된 점/);
   assert.match(layout, /lang="ko"/);
   assert.match(layout, /측정 기준봉 정비소/);

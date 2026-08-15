@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { CelebrationOverlay } from "./components/CelebrationOverlay";
 import { Modal } from "./components/Modal";
 import { RulerDiagram } from "./components/RulerDiagram";
 import {
@@ -8,6 +9,7 @@ import {
   faultLabels,
   faultHints,
   getRemainingFaults,
+  getReadingForRepairs,
   missionContent,
   repairLabels,
   tutorial,
@@ -36,11 +38,13 @@ export default function Home() {
   const [session, setSession] = useState<Session>(initialSession);
   const [history, setHistory] = useState<Snapshot[]>([]);
   const [records, setRecords] = useState<RepairRecord[]>([]);
+  const [celebrationOpen, setCelebrationOpen] = useState(false);
   const [notice, setNotice] = useState("먼저 화면의 칸이 모형이라는 약속을 확인해요.");
   const [modal, setModal] = useState<"meter" | "teacher" | "updates" | "reset" | null>(null);
 
   const mission = missionContent[session.missionIndex];
   const remainingFaults = useMemo(() => getRemainingFaults(mission, session.repairs), [mission, session.repairs]);
+  const currentReading = getReadingForRepairs(mission, session.repairs);
   const complete = session.stage === "complete";
 
   const move = (next: Session, message: string, record?: RepairRecord) => {
@@ -67,12 +71,18 @@ export default function Home() {
     else setNotice("괜찮아요. 선이 아니라 선 사이 칸을 세어 봐요.");
   };
   const chooseReason = (value: string) => {
-    if (value === mission.explanation) move(
+    if (value !== mission.explanation) {
+      setNotice("괜찮아요. 고친 곳이 무엇인지 다시 봐요.");
+      return;
+    }
+    move(
       { ...session, explanation: value, stage: "complete" },
       "정비 기록에 이 미션을 남겼어요.",
       buildRepairRecord(mission, session),
     );
-    else setNotice("괜찮아요. 고친 곳이 무엇인지 다시 봐요.");
+    if (session.missionIndex === missionContent.length - 1) {
+      requestAnimationFrame(() => setCelebrationOpen(true));
+    }
   };
   const nextMission = () => {
     if (session.missionIndex === missionContent.length - 1) {
@@ -90,7 +100,13 @@ export default function Home() {
     setNotice("바로 전 단계로 돌아왔어요. 뒤의 선택은 다시 해요.");
   };
   const reset = () => {
-    setTutorialStarted(false); setTutorialDone(false); setSession(initialSession); setHistory([]); setRecords([]); setModal(null); setNotice("처음부터 다시 시작해요. 먼저 모형 안내를 확인해요.");
+    setTutorialStarted(false); setTutorialDone(false); setSession(initialSession); setHistory([]); setRecords([]); setCelebrationOpen(false); setModal(null); setNotice("처음부터 다시 시작해요. 먼저 모형 안내를 확인해요.");
+    requestAnimationFrame(() => document.getElementById("welcome-title")?.scrollIntoView({ behavior: "smooth", block: "start" }));
+  };
+
+  const showRecords = () => {
+    setCelebrationOpen(false);
+    requestAnimationFrame(() => document.getElementById("record-title")?.scrollIntoView({ behavior: "smooth", block: "start" }));
   };
 
   return (
@@ -139,14 +155,14 @@ export default function Home() {
               {session.stage === "repair" && <RepairTools mission={mission} repairs={session.repairs} onRepair={repair} />}
               {session.stage === "count" && <ChoiceGroup label="선 사이의 칸은 몇 개인가요?" optionSuffix="개" options={[mission.length - 1, mission.length, mission.length + 1].map(String)} onChoose={(value) => chooseCount(Number(value))} />}
               {session.stage === "explain" && <ChoiceGroup label="왜 값이 달라졌나요?" options={[mission.explanation, "물체가 저절로 길어졌어요.", "화면의 칸이 실제 자가 되었어요."]} onChoose={chooseReason} />}
-              {complete && <div className="completion"><strong>정비 기록 완성!</strong><p>{mission.explanation}</p><button className="primary-button" onClick={nextMission} type="button">{mission.order === 5 ? "정비 기록 보기" : "다음 기준봉 정비하기"}</button></div>}
+              {complete && <div className="completion"><strong>정비 기록 완성!</strong><p>{mission.explanation}</p><button className="primary-button gi-pulse" onClick={nextMission} type="button">{mission.order === 5 ? "정비 기록 보기" : "다음 기준봉 정비하기"}</button></div>}
               <div className="utility-actions"><button disabled={!history.length} onClick={undo} type="button">한 단계 되돌리기</button><button onClick={() => setModal("reset")} type="button">처음부터 다시 하기</button></div>
             </section>
             <section className="bench" aria-label="화면 속 자 작업대">
               <div className="bench-heading"><span>작업대 · {session.stage === "count" || session.stage === "explain" || complete ? "고친 뒤" : "고치기 전"}</span><span className="model-badge">1cm를 나타내는 칸</span></div>
               <p className="object-name">{mission.object}의 길이를 재고 있어요.</p>
-              <RulerDiagram broken={session.stage !== "count" && session.stage !== "explain" && !complete} length={mission.length} missionId={mission.id} repaired={!remainingFaults.length} />
-              <div className="comparison" aria-label="고치기 전과 고친 뒤 비교"><div><span>고치기 전 숫자</span><strong>{mission.brokenReading === null ? "길이를 정할 수 없어요" : screenCm(mission.brokenReading)}</strong></div><div><span>고친 뒤 길이</span><strong>{session.stage === "explain" || complete ? screenCm(mission.length) : "고친 뒤 확인"}</strong></div></div>
+              <RulerDiagram broken={session.stage !== "count" && session.stage !== "explain" && !complete} length={mission.length} missionId={mission.id} repaired={!remainingFaults.length} repairs={session.repairs} />
+              <div className="comparison" aria-label="고치기 전과 고친 뒤 비교"><div><span>{session.repairs.length ? "지금 읽는 숫자" : "고치기 전 숫자"}</span><strong>{currentReading === null ? "길이를 정할 수 없어요" : screenCm(currentReading)}</strong></div><div><span>고친 뒤 길이</span><strong>{session.stage === "explain" || complete ? screenCm(mission.length) : "고친 뒤 확인"}</strong></div></div>
             </section>
           </div>
           {session.missionIndex === missionContent.length - 1 && complete && <RecordList records={records} />}
@@ -156,6 +172,7 @@ export default function Home() {
       {modal === "teacher" && <TeacherModal onClose={() => setModal(null)} />}
       {modal === "updates" && <UpdatesModal onClose={() => setModal(null)} />}
       {modal === "reset" && <Modal onClose={() => setModal(null)} title="처음부터 다시 할까요?"><p>지금까지 화면에서 만든 선택과 정비 기록이 사라져요.</p><div className="modal-actions"><button className="secondary-button" onClick={() => setModal(null)} type="button">계속하기</button><button className="primary-button" onClick={reset} type="button">처음부터 하기</button></div></Modal>}
+      {celebrationOpen && <CelebrationOverlay onRestart={reset} onViewRecords={showRecords} />}
     </main>
   );
 }
@@ -174,11 +191,11 @@ function screenCm(value: number) {
 }
 
 function ChoiceGroup({ label, options, labelFor, onChoose, optionSuffix, formatOption }: { label: string; options: string[]; labelFor?: (item: string) => string; onChoose: (value: string) => void; optionSuffix?: string; formatOption?: (value: string) => string }) {
-  return <fieldset className="choice-group"><legend>{label}</legend><div>{options.map((option) => <button key={option} onClick={() => onChoose(option)} type="button">{labelFor ? labelFor(option) : formatOption ? formatOption(option) : optionSuffix ? `${option} ${optionSuffix}` : option}</button>)}</div></fieldset>;
+  return <fieldset className="choice-group"><legend>{label}</legend><div>{options.map((option) => <button className="gi-pulse" key={option} onClick={() => onChoose(option)} type="button">{labelFor ? labelFor(option) : formatOption ? formatOption(option) : optionSuffix ? `${option} ${optionSuffix}` : option}</button>)}</div></fieldset>;
 }
 
 function RepairTools({ mission, repairs, onRepair }: { mission: typeof missionContent[number]; repairs: string[]; onRepair: (action: string) => void }) {
-  return <div className="repair-tools"><p>고칠 방법을 골라요.</p>{mission.repairs.map((action) => <button className="primary-button" disabled={repairs.includes(action)} key={action} onClick={() => onRepair(action)} type="button">{repairs.includes(action) ? "고쳤어요" : repairLabels[action]}</button>)}</div>;
+  return <div className="repair-tools"><p>고칠 방법을 골라요.</p>{mission.repairs.map((action) => <button className="primary-button gi-pulse" disabled={repairs.includes(action)} key={action} onClick={() => onRepair(action)} type="button">{repairs.includes(action) ? "고쳤어요" : repairLabels[action]}</button>)}</div>;
 }
 
 function RecordList({ records }: { records: RepairRecord[] }) {
@@ -192,5 +209,5 @@ function TeacherModal({ onClose }: { onClose: () => void }) {
   return <Modal onClose={onClose} title="교사용 안내"><ul><li>이 앱은 실제 자 사용을 대신하지 않습니다.</li><li>학생에게 화면에 물건을 대어 재지 않도록 알려 주세요.</li><li>0 맞추기는 초보 측정의 기본 절차입니다.</li><li>정답 속도보다 고장 이유를 말하는지 관찰해 주세요.</li></ul></Modal>;
 }
 function UpdatesModal({ onClose }: { onClose: () => void }) {
-  return <Modal onClose={onClose} title="업데이트 내역"><article className="update-entry"><strong>2026-07-18 · v1.1.0</strong><p>단계를 다섯 가지로 줄이고, 휴대폰에서도 지금 할 일과 내 기록을 더 쉽게 찾게 했어요.</p></article><article className="update-entry"><strong>2026-07-17 · v1.0.1</strong><p>다섯 단계 안내, 한 단계 되돌리기, 비교표와 작은 화면 조작을 더했어요.</p></article><article className="update-entry"><strong>2026-07-17 · v1.0.0</strong><p>시작점, 틈, 겹침, 같은 단위, 눈금 사이 세기 미션 5개를 만들었어요.</p></article></Modal>;
+  return <Modal onClose={onClose} title="업데이트 내역"><article className="update-entry"><strong>2026-08-15 · v1.2.0</strong><p>마지막 정비를 끝내면 축하 화면을 보여 주고, 고장난 자와 고친 자의 숫자가 단계마다 달라지게 했어요.</p></article><article className="update-entry"><strong>2026-07-18 · v1.1.0</strong><p>단계를 다섯 가지로 줄이고, 휴대폰에서도 지금 할 일과 내 기록을 더 쉽게 찾게 했어요.</p></article><article className="update-entry"><strong>2026-07-17 · v1.0.1</strong><p>다섯 단계 안내, 한 단계 되돌리기, 비교표와 작은 화면 조작을 더했어요.</p></article><article className="update-entry"><strong>2026-07-17 · v1.0.0</strong><p>시작점, 틈, 겹침, 같은 단위, 눈금 사이 세기 미션 5개를 만들었어요.</p></article></Modal>;
 }

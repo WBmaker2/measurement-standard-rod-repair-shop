@@ -3,14 +3,20 @@ type RulerDiagramProps = {
   broken: boolean;
   missionId: string;
   repaired: boolean;
+  repairs?: string[];
 };
 
-export function RulerDiagram({ length, broken, missionId, repaired }: RulerDiagramProps) {
-  const extra = broken && missionId === "overlapping-unit-tiles" ? 1 : 0;
-  const labelsBroken = broken && missionId === "boundary-and-combined-repair" && !repaired;
-  const originOffset = broken && missionId === "misaligned-zero-start" ? 1 : 0;
+export function RulerDiagram({ length, broken, missionId, repaired, repairs = [] }: RulerDiagramProps) {
+  const overlapFixed = repairs.includes("remove-overlap");
+  const gapFixed = repairs.includes("close-gap");
+  const originFixed = repairs.includes("align-origin");
+  const unitsFixed = repairs.includes("normalize-units");
+  const labelsFixed = repairs.includes("restore-labels");
+  const extra = broken && missionId === "overlapping-unit-tiles" && !overlapFixed ? 1 : 0;
+  const labelsBroken = broken && missionId === "boundary-and-combined-repair" && !labelsFixed;
+  const originOffset = broken && missionId === "misaligned-zero-start" && !originFixed ? 1 : 0;
   const blocks = Array.from({ length: length + extra }, (_, index) => index);
-  const description = !broken
+  const description = !broken || repaired
     ? `물체 시작 0, 끝 ${length}, 같은 단위칸 ${length}개.`
     : missionId === "misaligned-zero-start"
       ? `물체 시작은 눈금 1, 끝은 눈금 ${length + 1}이에요. 0에 맞추기 전에는 끝 숫자만 읽지 않아요.`
@@ -28,9 +34,9 @@ export function RulerDiagram({ length, broken, missionId, repaired }: RulerDiagr
         <text className="object-label" x="72" y="25">재는 물체</text>
         <line className="guide-line" x1="72" x2="72" y1="62" y2="190" />
         {blocks.map((block) => {
-          const hasGap = broken && missionId === "gapped-unit-tiles" && block >= 2;
-          const hasOverlap = broken && (missionId === "overlapping-unit-tiles" || missionId === "boundary-and-combined-repair") && block >= 3;
-          const unequal = broken && missionId === "unequal-unit-widths";
+          const hasGap = broken && missionId === "gapped-unit-tiles" && !gapFixed && block >= 2;
+          const hasOverlap = broken && (missionId === "overlapping-unit-tiles" || missionId === "boundary-and-combined-repair") && !overlapFixed && block >= 3;
+          const unequal = broken && missionId === "unequal-unit-widths" && !unitsFixed;
           const width = unequal ? [62, 110, 76, 112, 70, 98][block % 6] : 88;
           const x = 72 + (block + originOffset) * 88 + (hasGap ? 36 : 0) - (hasOverlap ? 28 : 0);
           return <rect className={`unit-block ${unequal ? "unequal" : ""} ${hasOverlap ? "overlap" : ""}`} height="72" key={block} rx="4" width={width} x={x} y="102" />;
