@@ -70,6 +70,8 @@ test("제품 소스는 저학년용 다섯 단계와 접근성 안내를 유지�
   assert.match(page, /2026-08-16 · v1\.2\.1/);
   assert.match(page, /CelebrationOverlay/);
   assert.match(page, /getReadingForRepairs/);
+  assert.match(page, /finalComparison/);
+  assert.match(page, /comparisonReading/);
   assert.match(page, /gi-pulse/);
   assert.match(celebration, /정비 끝!/);
   assert.match(celebration, /처음 화면으로/);

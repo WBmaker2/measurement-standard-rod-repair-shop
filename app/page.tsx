@@ -44,8 +44,10 @@ export default function Home() {
 
   const mission = missionContent[session.missionIndex];
   const remainingFaults = useMemo(() => getRemainingFaults(mission, session.repairs), [mission, session.repairs]);
-  const currentReading = getReadingForRepairs(mission, session.repairs);
   const complete = session.stage === "complete";
+  const currentReading = getReadingForRepairs(mission, session.repairs);
+  const finalComparison = session.stage === "explain" || complete;
+  const comparisonReading = finalComparison ? mission.brokenReading : currentReading;
 
   const move = (next: Session, message: string, record?: RepairRecord) => {
     setHistory((items) => [...items, { session, records }]);
@@ -162,7 +164,7 @@ export default function Home() {
               <div className="bench-heading"><span>작업대 · {session.stage === "count" || session.stage === "explain" || complete ? "고친 뒤" : "고치기 전"}</span><span className="model-badge">1cm를 나타내는 칸</span></div>
               <p className="object-name">{mission.object}의 길이를 재고 있어요.</p>
               <RulerDiagram broken={session.stage !== "count" && session.stage !== "explain" && !complete} length={mission.length} missionId={mission.id} repaired={!remainingFaults.length} repairs={session.repairs} />
-              <div className="comparison" aria-label="고치기 전과 고친 뒤 비교"><div><span>{session.repairs.length ? "지금 읽는 숫자" : "고치기 전 숫자"}</span><strong>{currentReading === null ? "길이를 정할 수 없어요" : screenCm(currentReading)}</strong></div><div><span>고친 뒤 길이</span><strong>{session.stage === "explain" || complete ? screenCm(mission.length) : "고친 뒤 확인"}</strong></div></div>
+              <div className="comparison" aria-label="고치기 전과 고친 뒤 비교"><div><span>{finalComparison || !session.repairs.length ? "고치기 전 숫자" : "지금 읽는 숫자"}</span><strong>{comparisonReading === null ? "길이를 정할 수 없어요" : screenCm(comparisonReading)}</strong></div><div><span>고친 뒤 길이</span><strong>{finalComparison ? screenCm(mission.length) : "고친 뒤 확인"}</strong></div></div>
             </section>
           </div>
           {session.missionIndex === missionContent.length - 1 && complete && <RecordList records={records} />}
