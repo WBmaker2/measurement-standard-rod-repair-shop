@@ -23,7 +23,7 @@ export function RulerDiagram({ length, broken, missionId, repaired, repairs = []
       : missionId === "gapped-unit-tiles"
         ? "단위칸 사이에 실제 빈틈이 있어요. 빈 공간은 단위칸이 아니에요."
         : missionId === "unequal-unit-widths"
-          ? "작은 칸과 큰 칸이 섞여 있어요. 1칸이라 불러도 크기가 달라요."
+          ? "작은 칸과 큰 칸이 섞여 7cm처럼 읽었어요. 같은 크기 칸으로 다시 봐요."
           : "단위칸 일부가 겹치거나 눈금 숫자 차례가 바르지 않아요.";
 
   return (
@@ -43,7 +43,7 @@ export function RulerDiagram({ length, broken, missionId, repaired, repairs = []
         })}
         {Array.from({ length: length + 1 }, (_, index) => {
           const x = 72 + index * 88;
-          const label = labelsBroken && index === 4 ? 3 : index;
+          const label = labelsBroken && index === 4 ? 3 : broken && missionId === "unequal-unit-widths" && !unitsFixed && index === length ? 7 : index;
           return <g key={`line-${index}`}><line className="tick" x1={x} x2={x} y1="86" y2="190" /><text className="tick-label" x={x - 5} y="210">{label}</text></g>;
         })}
         {broken && missionId === "gapped-unit-tiles" && <text className="fault-tag" x="275" y="97">틈</text>}

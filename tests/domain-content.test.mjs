@@ -30,11 +30,20 @@ test("수리 뒤 값은 물체 길이와 같고, 고장 값은 각 고정 사례
   const gap = missionContent.find((mission) => mission.id === "gapped-unit-tiles");
   const overlap = missionContent.find((mission) => mission.id === "overlapping-unit-tiles");
 
-  assert.equal(gap.brokenReading, 4);
+  assert.equal(gap.brokenReading, 6);
   assert.equal(getReadingAfterRepair(gap), 5);
   assert.equal(overlap.brokenReading, 6);
   assert.equal(getReadingAfterRepair(overlap), 5);
   assert.ok(missionContent.every((mission) => getReadingAfterRepair(mission) === mission.length));
+});
+
+test("모든 미션은 수정 전과 수정 후에 서로 다른 숫자를 보여 준다", () => {
+  assert.deepEqual(
+    missionContent.map((mission) => [mission.brokenReading, mission.length]),
+    [[6, 5], [6, 5], [6, 5], [7, 6], [8, 7]],
+  );
+  assert.ok(missionContent.every((mission) => Number.isInteger(mission.brokenReading)));
+  assert.ok(missionContent.every((mission) => mission.brokenReading !== mission.length));
 });
 
 test("수리 단계에 따라 현재 읽는 숫자가 바뀐다", () => {
@@ -44,7 +53,7 @@ test("수리 단계에 따라 현재 읽는 숫자가 바뀐다", () => {
 
   assert.equal(getReadingForRepairs(origin, []), 6);
   assert.equal(getReadingForRepairs(origin, ["align-origin"]), 5);
-  assert.equal(getReadingForRepairs(unknown, []), null);
+  assert.equal(getReadingForRepairs(unknown, []), 7);
   assert.equal(getReadingForRepairs(unknown, ["normalize-units"]), 6);
   assert.equal(getReadingForRepairs(finalMission, ["remove-overlap"]), 7);
   assert.equal(getReadingForRepairs(finalMission, ["remove-overlap", "restore-labels"]), 7);
