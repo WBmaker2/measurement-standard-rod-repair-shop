@@ -18,6 +18,15 @@ npm run build
 
 This starter does not use `wrangler.jsonc`.
 
+## 측정 기준봉 정비소
+
+초등학생이 화면 속 자의 시작점, 틈, 겹침, 칸 크기, 눈금 숫자 문제를 찾아 고치는 교육용 웹앱입니다. `어림 → 고장 찾기 → 고치기 → 다시 세기 → 이유`의 다섯 단계로 진행하며, 고치기 전·후 측정값과 정비 기록을 함께 보여 줍니다. 마지막 미션을 마치면 축하 화면에서 처음 화면이나 기록 화면으로 이동할 수 있습니다.
+
+- [공개 학습 화면](https://wbmaker2.github.io/measurement-standard-rod-repair-shop/)
+- [초등학생 UX 점검·개선 기록](docs/2026-09-01-elementary-webapp-ux-improvements.md)
+
+학습 화면을 수정한 뒤에는 `npm test`, `npm run lint`, `npm run build:pages`를 실행합니다.
+
 ## Included Shape
 
 - edit site code under `app/`
