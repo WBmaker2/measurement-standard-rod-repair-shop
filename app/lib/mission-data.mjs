@@ -2,7 +2,7 @@ export const tutorial = {
   id: "tutorial-equal-unit-tiles",
   title: "안내 활동: 같은 칸을 이어 재어요",
   length: 4,
-  message: "선은 5개지만 선 사이의 같은 칸은 4개예요.",
+  message: "선은 5개지만 선 사이의 같은 크기 칸은 4개예요.",
 };
 
 export const missionContent = [
@@ -79,7 +79,7 @@ export const missionContent = [
     faultOptions: ["unequal-unit", "gap", "overlap"],
     beforeText: "작은 칸과 큰 칸이 섞여 7cm처럼 읽었어요.",
     afterText: "같은 크기 칸 6개로 바르게 잴 수 있어요.",
-    explanation: "1칸이라 불러도 크기가 달라 7cm로 잘못 읽었어요.",
+    explanation: "칸 크기가 달라서 7cm로 잘못 읽었어요.",
     teacherNote: "값이 언제나 커지거나 작아진다고 말하지 않습니다.",
   },
   {
