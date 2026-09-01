@@ -8,6 +8,7 @@ import {
   getReadingForRepairs,
   getRemainingFaults,
   missionContent,
+  tutorial,
   validateMissionContent,
 } from "../app/lib/mission-data.mjs";
 
@@ -24,6 +25,13 @@ test("고정 미션은 다섯 가지 측정 오류와 마지막 복합 오류를
     ],
   );
   assert.deepEqual(missionContent.at(-1).faults, ["overlap", "label-sequence"]);
+});
+
+test("안내와 저학년용 이유 문장은 같은 칸과 고장 원인을 쉽게 설명한다", () => {
+  const unequal = missionContent.find((mission) => mission.id === "unequal-unit-widths");
+
+  assert.match(tutorial.message, /같은 크기 칸은 4개/);
+  assert.equal(unequal.explanation, "칸 크기가 달라서 7cm로 잘못 읽었어요.");
 });
 
 test("수리 뒤 값은 물체 길이와 같고, 고장 값은 각 고정 사례와 맞는다", () => {
